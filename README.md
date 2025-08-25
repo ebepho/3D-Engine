@@ -1,6 +1,7 @@
 # 3D Engine
 
 A custom 3D graphics engine built from scratch in C++ using SDL2 for window management and pixel-level rendering.
+<img width="800" height="381" alt="image" src="https://github.com/user-attachments/assets/4a8733f8-b5b4-429b-9709-69dd9c0fd093" />
 
 ## Features
 
