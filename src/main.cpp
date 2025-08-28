@@ -146,11 +146,6 @@ int main() {
     
     renderer.shutdown();
     
-    std::cout << "\nWindow closed. Your 3D engine with real graphics is working!" << std::endl;
-    std::cout << "Next steps:" << std::endl;
-    std::cout << "1. Add solid triangle filling" << std::endl;
-    std::cout << "2. Add textures and lighting" << std::endl;
-    std::cout << "3. Add camera controls" << std::endl;
-    
+    std::cout << "\nWindow closed." << std::endl;
     return 0;
 }
