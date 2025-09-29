@@ -14,11 +14,19 @@ namespace Engine3D {
         screenHeight = height;
         window = nullptr;
         renderer = nullptr;
+<<<<<<< HEAD
+=======
+        depthBuffer = new float[width * height];
+>>>>>>> d599987b47eba1d1c3bb6e7635d38d5551fc3749
     }
 
     Renderer::~Renderer() {
         cleanup();
+<<<<<<< HEAD
         // delete[] depthBuffer;
+=======
+        delete[] depthBuffer;
+>>>>>>> d599987b47eba1d1c3bb6e7635d38d5551fc3749
     }
 
     bool Renderer::init() {
