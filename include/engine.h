@@ -47,6 +47,10 @@ namespace Engine3D {
             return vec3d(x / length, y / length, z / length);
         }
 
+        float sumPoints() const {
+            return x + y + z;
+        }
+
         // Get length
         float length() const {
             return sqrt(x * x + y * y + z * z);
@@ -70,6 +74,14 @@ namespace Engine3D {
                 vec3d(points[0].x + v.x, points[0].y + v.y, points[0].z + v.z),
                 vec3d(points[1].x + v.x, points[1].y + v.y, points[1].z + v.z),
                 vec3d(points[2].x + v.x, points[2].y + v.y, points[2].z + v.z)
+            );
+        }
+
+        triangle operator -(const vec3d& v) const {
+            return triangle(
+                vec3d(points[0].x - v.x, points[0].y - v.y, points[0].z - v.z),
+                vec3d(points[1].x - v.x, points[1].y - v.y, points[1].z - v.z),
+                vec3d(points[2].x - v.x, points[2].y - v.y, points[2].z - v.z)
             );
         }
 

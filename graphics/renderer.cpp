@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <SDL2_gfxPrimitives.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -14,19 +15,10 @@ namespace Engine3D {
         screenHeight = height;
         window = nullptr;
         renderer = nullptr;
-<<<<<<< HEAD
-=======
-        depthBuffer = new float[width * height];
->>>>>>> d599987b47eba1d1c3bb6e7635d38d5551fc3749
     }
 
     Renderer::~Renderer() {
         cleanup();
-<<<<<<< HEAD
-        // delete[] depthBuffer;
-=======
-        delete[] depthBuffer;
->>>>>>> d599987b47eba1d1c3bb6e7635d38d5551fc3749
     }
 
     bool Renderer::init() {
@@ -110,15 +102,13 @@ namespace Engine3D {
         }
     }
 
-    void Renderer::drawMesh(const mesh& m, const matrix4x4& projection, const matrix4x4& rotX, const matrix4x4& rotZ) {
-        
-        // Collect triangles for depth sorting
-        vector<TriangleDepth> trianglesToRaster;
+    void Renderer::drawMesh(const mesh& m, const matrix4x4& projection, const matrix4x4& rotX, const matrix4x4& rotZ, vec3d cameraPos) {
+        std::vector<TriangleDepth> trianglesToRaster;
         
         for (const auto& tri : m.triangles) {
             // Apply rotation first
             triangle triRotated = rotateTriangle(tri, rotX, rotZ);
-            
+
             triangle triTranslated;
             triTranslated.points[0] = triRotated.points[0];
             triTranslated.points[1] = triRotated.points[1];
@@ -130,10 +120,7 @@ namespace Engine3D {
             triTranslated.points[2].z += 3.0f;
 
             triTranslated.calculateNormal();
-            
-            // Camera position (at origin for now)
-            vec3d cameraPos(0.0f, 0.0f, 0.0f);
-            
+
             // Skip back-facing triangles
             if (!triTranslated.isFacingCamera(cameraPos)) {
                 continue;
@@ -143,6 +130,7 @@ namespace Engine3D {
             vec3d lightDirection(0.0f, 0.0f, -1.0f); // Light coming from front
             float lightIntensity = calculateLighting(triTranslated.normal, lightDirection);
 
+            // Project triangle from 3D to 2D
             triangle proj;
             proj.points[0] = projection.multiplyVector(triTranslated.points[0]);
             proj.points[1] = projection.multiplyVector(triTranslated.points[1]);
@@ -161,21 +149,23 @@ namespace Engine3D {
             RGB shadedColor = calculateShadedColor(lightIntensity);
             
             // Store triangle for sorting
-            trianglesToRaster.push_back(TriangleDepth(proj, avgDepth, shadedColor));
+            // trianglesToRaster.push_back(TriangleDepth(proj, avgDepth, shadedColor));
+
+            // drawTriangle(proj, RGB(255, 255, 255));
+            fillTriangle(proj, shadedColor);
         }
-        
+
         // Sort triangles from back to front (higher Z first)
-        sort(trianglesToRaster.begin(), trianglesToRaster.end(), 
-             [](const TriangleDepth& a, const TriangleDepth& b) {
-                 return a.depth > b.depth;
-             });
+        // sort(trianglesToRaster.begin(), trianglesToRaster.end(), 
+        //      [](const TriangleDepth& a, const TriangleDepth& b) {
+        //          return a.depth > b.depth;
+        //      });
         
         // Now render sorted triangles
-        for (const auto& triDepth : trianglesToRaster) {
-            fillTriangle(triDepth.tri, triDepth.color);
-        }
+        // for (const auto& triDepth : trianglesToRaster) {
+        //     fillTriangle(triDepth.tri, triDepth.color);
+        // }
     }
-
 
     void Renderer::drawTriangle(const triangle& tri, RGB color) {
         // Set the drawing color
@@ -196,52 +186,16 @@ namespace Engine3D {
     }
 
     void Renderer::fillTriangle(const triangle& tri, RGB color) {
+        Sint16 vx[3] = { (Sint16)tri.points[0].x, (Sint16)tri.points[1].x, (Sint16)tri.points[2].x };
+        Sint16 vy[3] = { (Sint16)tri.points[0].y, (Sint16)tri.points[1].y, (Sint16)tri.points[2].y };
+        
         // Set the drawing color
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
         
-        // Simple triangle filling using scanline approach
-        // Find bounding box
-        int minX = (int)min({tri.points[0].x, tri.points[1].x, tri.points[2].x});
-        int maxX = (int)max({tri.points[0].x, tri.points[1].x, tri.points[2].x});
-        int minY = (int)min({tri.points[0].y, tri.points[1].y, tri.points[2].y});
-        int maxY = (int)max({tri.points[0].y, tri.points[1].y, tri.points[2].y});
-        
-        // Clamp to screen bounds
-        minX = max(0, minX);
-        maxX = min(screenWidth - 1, maxX);
-        minY = max(0, minY);
-        maxY = min(screenHeight - 1, maxY);
-        
-        // Use barycentric coordinates to fill triangle
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                // Check if point is inside triangle using barycentric coordinates
-                vec3d p0(tri.points[0].x, tri.points[0].y, 0);
-                vec3d p1(tri.points[1].x, tri.points[1].y, 0);
-                vec3d p2(tri.points[2].x, tri.points[2].y, 0);
-                vec3d p(x, y, 0);
-                
-                vec3d v0 = p2 - p0;
-                vec3d v1 = p1 - p0;
-                vec3d v2 = p - p0;
-                
-                float dot00 = v0.dot(v0);
-                float dot01 = v0.dot(v1);
-                float dot02 = v0.dot(v2);
-                float dot11 = v1.dot(v1);
-                float dot12 = v1.dot(v2);
-                
-                float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-                float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-                float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-                
-                // Check if point is in triangle
-                if ((u >= 0) && (v >= 0) && (u + v <= 1)) {
-                    SDL_RenderDrawPoint(renderer, x, y);
-                }
-            }
-        }
+        // Fill the triangle
+        filledPolygonRGBA(renderer, vx, vy, 3, color.r, color.g, color.b, 255);
     }
+
 
     RGB Renderer::calculateShadedColor(float lightIntensity) {
         // Convert light intensity to grayscale color

@@ -115,6 +115,7 @@ namespace Engine3D {
     float calculateLighting(const vec3d& normal, const vec3d& lightDirection) {
         // Dot product gives us the cosine of the angle between normal and light
         float dp = normal.dot(lightDirection.normalize());
+        
         // Clamp to 0-1 range (no negative lighting)
         return max(0.0f, dp);
     }

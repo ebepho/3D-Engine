@@ -24,9 +24,7 @@ namespace Engine3D {
             SDL_Window* window;
             SDL_Renderer* renderer;
             int screenWidth, screenHeight;
-            
-            // Helper functions
-    
+                
         public:
             Renderer(int width, int height);
             ~Renderer();
@@ -38,6 +36,7 @@ namespace Engine3D {
 
             void drawMesh(const mesh& m, const matrix4x4& projection);
             void drawMesh(const mesh& m, const matrix4x4& projection, const matrix4x4& rotX, const matrix4x4& rotZ);
+            void drawMesh(const mesh& m, const matrix4x4& projection, const matrix4x4& rotX, const matrix4x4& rotZ, vec3d cameraPos);
             void drawTriangle(const triangle& tri, RGB color);
             void fillTriangle(const triangle& tri, RGB color);
             RGB calculateShadedColor(float lightIntensity);

@@ -11,14 +11,16 @@ void populateCube(mesh& m);
 
 int main(){
     mesh shape;
+    vec3d cameraPos(0.0f, 0.0f, 0.0f);
     
     // Try to load tetrahedron from file, fallback to cube if failed
-    if (!shape.loadFromObjectFile("tetrahedron.obj")) {
-        cout << "Failed to load tetrahedron.obj, using default cube" << endl;
-        populateCube(shape);
-    } else {
-        cout << "Successfully loaded tetrahedron.obj with " << shape.triangles.size() << " triangles" << endl;
-    }
+    // if (!shape.loadFromObjectFile("tetrahedron.obj")) {
+    //     cout << "Failed to load tetrahedron.obj, using default cube" << endl;
+    //     populateCube(shape);
+    // } else {
+    //     cout << "Successfully loaded tetrahedron.obj with " << shape.triangles.size() << " triangles" << endl;
+    // }
+    populateCube(shape);
     
     int width = 800;
     int height = 600;
@@ -50,15 +52,15 @@ int main(){
 
         // Update rotation angle
         theta += 0.01f;
-        
+
         // Create rotation matrices
         matrix4x4 rotX, rotZ;
-        createRotationMatrixX(rotX, theta * 0.5f);
+        createRotationMatrixX(rotX, theta);
         createRotationMatrixZ(rotZ, theta);
 
         // Render
         renderer.clear();
-        renderer.drawMesh(shape, projection, rotX, rotZ);
+        renderer.drawMesh(shape, projection, rotX, rotZ, cameraPos);
         renderer.present();
         
         // Cap framerate
